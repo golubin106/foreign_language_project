@@ -1,20 +1,27 @@
 import { spawn } from "node:child_process";
 
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-
-const processes = [
-  { name: "api", args: ["run", "dev:api"] },
-  { name: "web", args: ["run", "dev"] },
+const commands = [
+  { name: "api", command: "npm run dev:api" },
+  { name: "web", command: "npm run dev" },
 ];
 
-function startProcess({ name, args }) {
-  const child = spawn(npmCommand, args, {
+let shuttingDown = false;
+
+function startProcess({ name, command }) {
+  const child = spawn(command, {
     stdio: "inherit",
-    shell: false,
+    shell: true,
+    windowsHide: false,
+  });
+
+  child.on("error", (error) => {
+    console.error(`${name} failed to start: ${error.message}`);
+    stopAll();
+    process.exit(1);
   });
 
   child.on("exit", (code) => {
-    if (code && code !== 0) {
+    if (!shuttingDown && code && code !== 0) {
       console.error(`${name} stopped with exit code ${code}`);
       stopAll();
       process.exit(code);
@@ -24,9 +31,11 @@ function startProcess({ name, args }) {
   return child;
 }
 
-const children = processes.map(startProcess);
+const children = commands.map(startProcess);
 
 function stopAll() {
+  shuttingDown = true;
+
   for (const child of children) {
     if (!child.killed) {
       child.kill();
