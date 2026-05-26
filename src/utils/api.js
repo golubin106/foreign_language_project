@@ -26,8 +26,8 @@ export function clearStoredSession() {
   localStorage.removeItem(USER_KEY);
 }
 
-export async function apiRequest(path, options = {}) {
-  const token = getStoredToken();
+export async function apiRequest(path, options = {}, tokenOverride = undefined) {
+  const token = tokenOverride === undefined ? getStoredToken() : tokenOverride;
   const headers = {
     "Content-Type": "application/json",
     ...(options.headers || {}),
