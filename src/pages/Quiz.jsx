@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getLessons } from "../data/getLessons";
-import { readJson, writeJson } from "../utils/storage";
+import { readArray, writeJson } from "../utils/storage";
 
 function Quiz() {
   const { id } = useParams();
@@ -61,7 +61,7 @@ function Quiz() {
       completedAt: new Date().toLocaleString(),
     };
 
-    const savedResults = readJson("quizResults", []);
+    const savedResults = readArray("quizResults");
     const filteredResults = savedResults.filter(
       (item) => item.lessonId !== lesson.id
     );
