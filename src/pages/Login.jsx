@@ -1,28 +1,35 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getCurrentUser, startSession, verifyPassword } from "../utils/auth";
 
 function Login() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  function handleLogin(event) {
+  async function handleLogin(event) {
     event.preventDefault();
+    setError("");
 
-    const savedUser = JSON.parse(localStorage.getItem("user"));
+    const savedUser = getCurrentUser();
 
     if (!savedUser) {
-      alert("Пользователь не найден. Сначала зарегистрируйтесь.");
+      setError("Пользователь не найден. Сначала зарегистрируйтесь.");
       return;
     }
 
-    if (savedUser.email === email && savedUser.password === password) {
-      localStorage.setItem("isLoggedIn", "true");
+    const normalizedEmail = email.trim().toLowerCase();
+    const passwordMatches = await verifyPassword(savedUser, password);
+
+    if (savedUser.email === normalizedEmail && passwordMatches) {
+      startSession();
       navigate("/profile");
-    } else {
-      alert("Неверный email или пароль.");
+      return;
     }
+
+    setError("Неверный email или пароль.");
   }
 
   return (
@@ -33,6 +40,8 @@ function Login() {
         <p className="authText">
           Войдите, чтобы продолжить обучение и отслеживать свой прогресс.
         </p>
+
+        {error && <p className="formError">{error}</p>}
 
         <form onSubmit={handleLogin} className="authForm" autoComplete="off">
           <label>
