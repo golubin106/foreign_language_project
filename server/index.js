@@ -11,7 +11,6 @@ const __dirname = path.dirname(__filename);
 const dataDirectory = path.join(__dirname, "data");
 const databasePath = path.join(dataDirectory, "database.json");
 const port = Number(process.env.PORT || 3001);
-const adminInviteCode = process.env.ADMIN_INVITE_CODE || "LINGUA_ADMIN";
 
 function hashPassword(password) {
   return createHash("sha256").update(password).digest("hex");
@@ -29,6 +28,10 @@ function publicUser(user) {
     role: user.role,
     createdAt: user.createdAt,
   };
+}
+
+function publicUsers(users) {
+  return users.map(publicUser);
 }
 
 async function createInitialDatabase() {
@@ -81,7 +84,7 @@ function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
     "Access-Control-Allow-Origin": "http://localhost:5173",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Content-Type": "application/json; charset=utf-8",
   });
 
@@ -177,7 +180,7 @@ async function handleRequest(request, response) {
         name,
         email,
         passwordHash: hashPassword(password),
-        role: String(body.adminCode || "").trim() === adminInviteCode ? "admin" : "student",
+        role: database.users.length === 0 ? "admin" : "student",
         createdAt: new Date().toLocaleString(),
       };
       const token = randomUUID();
@@ -225,6 +228,57 @@ async function handleRequest(request, response) {
       database.sessions = database.sessions.filter((session) => session.token !== token);
       await writeDatabase(database);
       sendJson(response, 200, { ok: true });
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/users") {
+      if (!requireAdmin(database, request, response)) {
+        return;
+      }
+
+      sendJson(response, 200, { users: publicUsers(database.users) });
+      return;
+    }
+
+    const userRoleMatch = url.pathname.match(/^\/api\/users\/([^/]+)\/role$/);
+
+    if (userRoleMatch && request.method === "PATCH") {
+      const currentUser = requireAdmin(database, request, response);
+
+      if (!currentUser) {
+        return;
+      }
+
+      const targetUserId = userRoleMatch[1];
+      const body = await readBody(request);
+      const role = String(body.role || "");
+
+      if (!["admin", "student"].includes(role)) {
+        sendJson(response, 400, { message: "Недопустимая роль пользователя." });
+        return;
+      }
+
+      const targetUser = database.users.find((user) => user.id === targetUserId);
+
+      if (!targetUser) {
+        sendJson(response, 404, { message: "Пользователь не найден." });
+        return;
+      }
+
+      const adminCount = database.users.filter((user) => user.role === "admin").length;
+
+      if (targetUser.role === "admin" && role === "student" && adminCount <= 1) {
+        sendJson(response, 400, { message: "Нельзя снять роль у последнего администратора." });
+        return;
+      }
+
+      targetUser.role = role;
+      await writeDatabase(database);
+
+      sendJson(response, 200, {
+        user: publicUser(targetUser),
+        users: publicUsers(database.users),
+      });
       return;
     }
 
