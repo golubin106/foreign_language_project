@@ -1,9 +1,15 @@
 import { defaultLessons } from "./lessons";
+import { readJson } from "../utils/storage";
+
+function readLessonList(key) {
+  const value = readJson(key, []);
+  return Array.isArray(value) ? value : [];
+}
 
 export function getLessons() {
-  const customLessons = JSON.parse(localStorage.getItem("customLessons")) || [];
-  const editedLessons = JSON.parse(localStorage.getItem("editedLessons")) || [];
-  const deletedLessons = JSON.parse(localStorage.getItem("deletedLessons")) || [];
+  const customLessons = readLessonList("customLessons");
+  const editedLessons = readLessonList("editedLessons");
+  const deletedLessons = readLessonList("deletedLessons");
 
   const mergedDefaultLessons = defaultLessons.map((lesson) => {
     const editedLesson = editedLessons.find((item) => item.id === lesson.id);
