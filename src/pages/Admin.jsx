@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getLessons } from "../data/getLessons";
-import { defaultLessons } from "../data/lessons";
-import { readArray, writeJson } from "../utils/storage";
+import { apiRequest } from "../utils/api";
 
 function Admin() {
   const navigate = useNavigate();
@@ -21,34 +19,41 @@ function Admin() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!isEditMode) {
-      return;
+    async function loadLesson() {
+      if (!isEditMode) {
+        return;
+      }
+
+      try {
+        const data = await apiRequest("/lessons");
+        const lesson = data.lessons.find((item) => item.id === editId);
+
+        if (!lesson) {
+          alert("Урок не найден");
+          navigate("/lessons");
+          return;
+        }
+
+        setTitle(lesson.title);
+        setLevel(lesson.level);
+        setDescription(lesson.description);
+        setWordsText(
+          lesson.words
+            .map((word) => `${word.english} - ${word.russian}`)
+            .join("\n")
+        );
+        setQuestion(lesson.questions[0]?.question || "");
+        setOptionsText(lesson.questions[0]?.options.join("\n") || "");
+        setAnswer(lesson.questions[0]?.answer || "");
+      } catch (error) {
+        setError(error.message);
+      }
     }
 
-    const lesson = getLessons().find((item) => item.id === editId);
-
-    if (!lesson) {
-      alert("Урок не найден");
-      navigate("/lessons");
-      return;
-    }
-
-    setTitle(lesson.title);
-    setLevel(lesson.level);
-    setDescription(lesson.description);
-
-    setWordsText(
-      lesson.words
-        .map((word) => `${word.english} - ${word.russian}`)
-        .join("\n")
-    );
-
-    setQuestion(lesson.questions[0]?.question || "");
-    setOptionsText(lesson.questions[0]?.options.join("\n") || "");
-    setAnswer(lesson.questions[0]?.answer || "");
+    loadLesson();
   }, [editId, isEditMode, navigate]);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     setError("");
 
@@ -102,7 +107,7 @@ function Admin() {
       return;
     }
 
-    const newLesson = {
+    const lesson = {
       id: isEditMode ? editId : Date.now(),
       title: trimmedTitle,
       level,
@@ -117,33 +122,16 @@ function Admin() {
       ],
     };
 
-    if (isEditMode) {
-      const isDefaultLesson = defaultLessons.some(
-        (lesson) => lesson.id === editId
-      );
+    try {
+      await apiRequest(isEditMode ? `/lessons/${editId}` : "/lessons", {
+        method: isEditMode ? "PUT" : "POST",
+        body: JSON.stringify(lesson),
+      });
 
-      if (isDefaultLesson) {
-        const editedLessons = readArray("editedLessons");
-        const updatedEditedLessons = [
-          ...editedLessons.filter((lesson) => lesson.id !== editId),
-          newLesson,
-        ];
-
-        writeJson("editedLessons", updatedEditedLessons);
-      } else {
-        const savedCustomLessons = readArray("customLessons");
-        const updatedCustomLessons = savedCustomLessons.map((lesson) =>
-          lesson.id === editId ? newLesson : lesson
-        );
-
-        writeJson("customLessons", updatedCustomLessons);
-      }
-    } else {
-      const savedCustomLessons = readArray("customLessons");
-      writeJson("customLessons", [...savedCustomLessons, newLesson]);
+      navigate("/lessons");
+    } catch (error) {
+      setError(error.message);
     }
-
-    navigate("/lessons");
   }
 
   return (
