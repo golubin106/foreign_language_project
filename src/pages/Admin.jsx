@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getLessons } from "../data/getLessons";
 import { defaultLessons } from "../data/lessons";
+import { readJson, writeJson } from "../utils/storage";
 
 function Admin() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ function Admin() {
   const [question, setQuestion] = useState("");
   const [optionsText, setOptionsText] = useState("");
   const [answer, setAnswer] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!isEditMode) {
@@ -48,12 +50,25 @@ function Admin() {
 
   function handleSubmit(event) {
     event.preventDefault();
+    setError("");
+
+    const trimmedTitle = title.trim();
+    const trimmedDescription = description.trim();
+    const trimmedQuestion = question.trim();
+    const trimmedAnswer = answer.trim();
+
+    if (!trimmedTitle || !trimmedDescription || !trimmedQuestion) {
+      setError("Заполните название, описание и вопрос теста.");
+      return;
+    }
 
     const words = wordsText
       .split("\n")
-      .filter((line) => line.trim() !== "")
+      .map((line) => line.trim())
+      .filter(Boolean)
       .map((line) => {
-        const [english, russian] = line.split(/\s*[-—]\s*/);
+        const [english, ...translationParts] = line.split(/\s*[-—]\s*/);
+        const russian = translationParts.join(" - ");
 
         return {
           english: english ? english.trim() : "",
@@ -65,32 +80,39 @@ function Admin() {
       (word) => word.english === "" || word.russian === ""
     );
 
-    if (hasIncorrectWords) {
-      alert("Проверьте поле 'Слова'. Формат должен быть: English - Русский перевод");
+    if (words.length === 0 || hasIncorrectWords) {
+      setError("Проверьте поле 'Слова'. Формат: English - Русский перевод.");
       return;
     }
 
     const options = optionsText
       .split("\n")
-      .filter((line) => line.trim() !== "")
-      .map((line) => line.trim());
+      .map((line) => line.trim())
+      .filter(Boolean);
 
-    if (!options.includes(answer)) {
-      alert("Правильный ответ должен совпадать с одним из вариантов ответа.");
+    const uniqueOptions = [...new Set(options)];
+
+    if (uniqueOptions.length < 2) {
+      setError("Добавьте минимум два разных варианта ответа.");
+      return;
+    }
+
+    if (!uniqueOptions.includes(trimmedAnswer)) {
+      setError("Правильный ответ должен совпадать с одним из вариантов ответа.");
       return;
     }
 
     const newLesson = {
       id: isEditMode ? editId : Date.now(),
-      title,
+      title: trimmedTitle,
       level,
-      description,
+      description: trimmedDescription,
       words,
       questions: [
         {
-          question,
-          options,
-          answer,
+          question: trimmedQuestion,
+          options: uniqueOptions,
+          answer: trimmedAnswer,
         },
       ],
     };
@@ -101,39 +123,24 @@ function Admin() {
       );
 
       if (isDefaultLesson) {
-        const editedLessons =
-          JSON.parse(localStorage.getItem("editedLessons")) || [];
-
+        const editedLessons = readJson("editedLessons", []);
         const updatedEditedLessons = [
           ...editedLessons.filter((lesson) => lesson.id !== editId),
           newLesson,
         ];
 
-        localStorage.setItem(
-          "editedLessons",
-          JSON.stringify(updatedEditedLessons)
-        );
+        writeJson("editedLessons", updatedEditedLessons);
       } else {
-        const savedCustomLessons =
-          JSON.parse(localStorage.getItem("customLessons")) || [];
-
+        const savedCustomLessons = readJson("customLessons", []);
         const updatedCustomLessons = savedCustomLessons.map((lesson) =>
           lesson.id === editId ? newLesson : lesson
         );
 
-        localStorage.setItem(
-          "customLessons",
-          JSON.stringify(updatedCustomLessons)
-        );
+        writeJson("customLessons", updatedCustomLessons);
       }
     } else {
-      const savedCustomLessons =
-        JSON.parse(localStorage.getItem("customLessons")) || [];
-
-      localStorage.setItem(
-        "customLessons",
-        JSON.stringify([...savedCustomLessons, newLesson])
-      );
+      const savedCustomLessons = readJson("customLessons", []);
+      writeJson("customLessons", [...savedCustomLessons, newLesson]);
     }
 
     navigate("/lessons");
@@ -157,6 +164,8 @@ function Admin() {
               : "Заполните форму, чтобы добавить учебный материал в каталог платформы."}
           </p>
         </div>
+
+        {error && <p className="formError">{error}</p>}
 
         <form className="authForm" onSubmit={handleSubmit}>
           <label>
