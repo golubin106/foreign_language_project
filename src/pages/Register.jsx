@@ -26,8 +26,12 @@ function Register() {
       return;
     }
 
-    await createUser({ name, email, password, adminCode });
-    navigate("/profile");
+    try {
+      await createUser({ name, email, password, adminCode });
+      navigate("/profile");
+    } catch (error) {
+      setError(error.message);
+    }
   }
 
   return (
