@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getCurrentUser, startSession, verifyPassword } from "../utils/auth";
+import { loginUser } from "../utils/auth";
 
 function Login() {
   const navigate = useNavigate();
@@ -13,23 +13,12 @@ function Login() {
     event.preventDefault();
     setError("");
 
-    const savedUser = getCurrentUser();
-
-    if (!savedUser) {
-      setError("Пользователь не найден. Сначала зарегистрируйтесь.");
-      return;
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-    const passwordMatches = await verifyPassword(savedUser, password);
-
-    if (savedUser.email === normalizedEmail && passwordMatches) {
-      startSession();
+    try {
+      await loginUser({ email, password });
       navigate("/profile");
-      return;
+    } catch (error) {
+      setError(error.message);
     }
-
-    setError("Неверный email или пароль.");
   }
 
   return (
