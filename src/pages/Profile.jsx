@@ -1,16 +1,30 @@
 import { useEffect, useState } from "react";
-import { getLessons } from "../data/getLessons";
 import { getCurrentUser } from "../utils/auth";
-import { readArray } from "../utils/storage";
+import { apiRequest } from "../utils/api";
 
 function Profile() {
   const [results, setResults] = useState([]);
-  const lessons = getLessons();
+  const [lessonCount, setLessonCount] = useState(0);
+  const [error, setError] = useState("");
 
   const user = getCurrentUser();
 
   useEffect(() => {
-    setResults(readArray("quizResults"));
+    async function loadProfileData() {
+      try {
+        const [lessonsData, resultsData] = await Promise.all([
+          apiRequest("/lessons"),
+          apiRequest("/results"),
+        ]);
+
+        setLessonCount(lessonsData.lessons?.length || 0);
+        setResults(resultsData.results || []);
+      } catch (error) {
+        setError(error.message);
+      }
+    }
+
+    loadProfileData();
   }, []);
 
   const completedLessons = results.length;
@@ -24,11 +38,15 @@ function Profile() {
       : 0;
 
   const progressPercent =
-    lessons.length > 0 ? Math.round((completedLessons / lessons.length) * 100) : 0;
+    lessonCount > 0 ? Math.round((completedLessons / lessonCount) * 100) : 0;
 
-  function clearProgress() {
-    localStorage.removeItem("quizResults");
-    setResults([]);
+  async function clearProgress() {
+    try {
+      await apiRequest("/results", { method: "DELETE" });
+      setResults([]);
+    } catch (error) {
+      setError(error.message);
+    }
   }
 
   return (
@@ -37,6 +55,8 @@ function Profile() {
         <p className="badge">Профиль</p>
 
         <h1>Личный кабинет</h1>
+
+        {error && <p className="formError">{error}</p>}
 
         <div className="userCard">
           <div className="avatarCircle">
