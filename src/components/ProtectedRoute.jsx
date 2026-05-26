@@ -1,10 +1,13 @@
 import { Navigate } from "react-router-dom";
+import { isAdmin, isAuthenticated } from "../utils/auth";
 
-function ProtectedRoute({ children }) {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-
-  if (!isLoggedIn) {
+function ProtectedRoute({ children, requireAdmin = false }) {
+  if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (requireAdmin && !isAdmin()) {
+    return <Navigate to="/profile" replace />;
   }
 
   return children;
