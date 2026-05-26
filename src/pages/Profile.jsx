@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { getLessons } from "../data/getLessons";
+import { getCurrentUser } from "../utils/auth";
+import { readJson } from "../utils/storage";
 
 function Profile() {
   const [results, setResults] = useState([]);
   const lessons = getLessons();
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = getCurrentUser();
 
   useEffect(() => {
-    const savedResults = JSON.parse(localStorage.getItem("quizResults")) || [];
-    setResults(savedResults);
+    const savedResults = readJson("quizResults", []);
+    setResults(Array.isArray(savedResults) ? savedResults : []);
   }, []);
 
   const completedLessons = results.length;
@@ -44,6 +46,9 @@ function Profile() {
           <div>
             <h2>{user?.name || "Пользователь"}</h2>
             <p>{user?.email || "Email не указан"}</p>
+            <span>
+              Роль: {user?.role === "admin" ? "Администратор" : "Ученик"}
+            </span>
             <span>
               Дата регистрации: {user?.createdAt || "Неизвестно"}
             </span>
