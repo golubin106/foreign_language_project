@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { createUser } from "../utils/auth";
 
 function Register() {
   const navigate = useNavigate();
@@ -7,20 +8,25 @@ function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [adminCode, setAdminCode] = useState("");
+  const [error, setError] = useState("");
 
-  function handleRegister(event) {
+  async function handleRegister(event) {
     event.preventDefault();
+    setError("");
 
-    const newUser = {
-      name,
-      email,
-      password,
-      createdAt: new Date().toLocaleString(),
-    };
+    if (password !== confirmPassword) {
+      setError("Пароли не совпадают.");
+      return;
+    }
 
-    localStorage.setItem("user", JSON.stringify(newUser));
-    localStorage.setItem("isLoggedIn", "true");
+    if (password.length < 6) {
+      setError("Пароль должен содержать минимум 6 символов.");
+      return;
+    }
 
+    await createUser({ name, email, password, adminCode });
     navigate("/profile");
   }
 
@@ -32,6 +38,8 @@ function Register() {
         <p className="authText">
           Создайте учебный профиль для сохранения результатов тестов.
         </p>
+
+        {error && <p className="formError">{error}</p>}
 
         <form onSubmit={handleRegister} className="authForm" autoComplete="off">
           <label>
@@ -65,7 +73,30 @@ function Register() {
               onChange={(event) => setPassword(event.target.value)}
               autoComplete="new-password"
               required
-              minLength="4"
+              minLength="6"
+            />
+          </label>
+
+          <label>
+            Повторите пароль
+            <input
+              type="password"
+              placeholder="Повторите пароль"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              autoComplete="new-password"
+              required
+              minLength="6"
+            />
+          </label>
+
+          <label>
+            Код администратора
+            <input
+              type="text"
+              placeholder="Заполняется только для администратора"
+              value={adminCode}
+              onChange={(event) => setAdminCode(event.target.value)}
             />
           </label>
 
