@@ -27,10 +27,10 @@ export function isAdmin() {
   return isAuthenticated() && getCurrentUser()?.role === "admin";
 }
 
-export async function createUser({ name, email, password, adminCode }) {
+export async function createUser({ name, email, password }) {
   const session = await apiRequest("/auth/register", {
     method: "POST",
-    body: JSON.stringify({ name, email, password, adminCode }),
+    body: JSON.stringify({ name, email, password }),
   });
 
   saveSession(session);
