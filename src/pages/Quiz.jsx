@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getLessons } from "../data/getLessons";
+import { readJson, writeJson } from "../utils/storage";
 
 function Quiz() {
   const { id } = useParams();
@@ -9,6 +10,7 @@ function Quiz() {
 
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
 
   if (!lesson) {
     return (
@@ -19,6 +21,7 @@ function Quiz() {
   }
 
   function selectAnswer(questionIndex, option) {
+    setError("");
     setAnswers({
       ...answers,
       [questionIndex]: option,
@@ -26,6 +29,18 @@ function Quiz() {
   }
 
   function checkResult() {
+    setError("");
+
+    if (lesson.questions.length === 0) {
+      setError("В этом уроке пока нет вопросов для теста.");
+      return;
+    }
+
+    if (Object.keys(answers).length < lesson.questions.length) {
+      setError("Ответьте на все вопросы перед проверкой результата.");
+      return;
+    }
+
     let score = 0;
 
     lesson.questions.forEach((question, index) => {
@@ -46,15 +61,13 @@ function Quiz() {
       completedAt: new Date().toLocaleString(),
     };
 
-    const savedResults = JSON.parse(localStorage.getItem("quizResults")) || [];
-
+    const savedResults = readJson("quizResults", []);
     const filteredResults = savedResults.filter(
       (item) => item.lessonId !== lesson.id
     );
-
     const updatedResults = [...filteredResults, newResult];
 
-    localStorage.setItem("quizResults", JSON.stringify(updatedResults));
+    writeJson("quizResults", updatedResults);
   }
 
   return (
@@ -89,6 +102,8 @@ function Quiz() {
             ))}
           </div>
         ))}
+
+        {error && <p className="formError">{error}</p>}
 
         <button className="primaryButton" onClick={checkResult}>
           Проверить результат
