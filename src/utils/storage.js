@@ -14,6 +14,11 @@ export function readJson(key, fallback) {
   }
 }
 
+export function readArray(key) {
+  const value = readJson(key, []);
+  return Array.isArray(value) ? value : [];
+}
+
 export function writeJson(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
