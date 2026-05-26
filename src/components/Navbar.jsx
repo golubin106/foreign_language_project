@@ -1,15 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
+import { clearSession, getCurrentUser, isAdmin, isAuthenticated } from "../utils/auth";
 
 function Navbar() {
   const navigate = useNavigate();
 
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  const user = JSON.parse(localStorage.getItem("user"));
+  const loggedIn = isAuthenticated();
+  const admin = isAdmin();
+  const user = getCurrentUser();
 
   function handleLogout() {
-    localStorage.removeItem("isLoggedIn");
+    clearSession();
     navigate("/login");
-    window.location.reload();
   }
 
   return (
@@ -22,7 +23,9 @@ function Navbar() {
         <Link to="/">Главная</Link>
         <Link to="/lessons">Уроки</Link>
 
-        {isLoggedIn ? (
+        {admin && <Link to="/admin">Админ</Link>}
+
+        {loggedIn ? (
           <>
             <Link to="/profile" className="accountLink">
               {user?.name ? user.name : "Профиль"}
