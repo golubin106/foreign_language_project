@@ -4,3 +4,4 @@ dist/
 .env.local
 .vs/
 .DS_Store
+server/data/database.json
