@@ -9,7 +9,6 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [adminCode, setAdminCode] = useState("");
   const [error, setError] = useState("");
 
   async function handleRegister(event) {
@@ -27,7 +26,7 @@ function Register() {
     }
 
     try {
-      await createUser({ name, email, password, adminCode });
+      await createUser({ name, email, password });
       navigate("/profile");
     } catch (error) {
       setError(error.message);
@@ -40,7 +39,8 @@ function Register() {
         <p className="badge">Регистрация</p>
         <h1>Создать аккаунт</h1>
         <p className="authText">
-          Создайте учебный профиль для сохранения результатов тестов.
+          Создайте учебный профиль для сохранения результатов тестов. Первый
+          пользователь в новой базе автоматически становится администратором.
         </p>
 
         {error && <p className="formError">{error}</p>}
@@ -91,16 +91,6 @@ function Register() {
               autoComplete="new-password"
               required
               minLength="6"
-            />
-          </label>
-
-          <label>
-            Код администратора
-            <input
-              type="text"
-              placeholder="Заполняется только для администратора"
-              value={adminCode}
-              onChange={(event) => setAdminCode(event.target.value)}
             />
           </label>
 
