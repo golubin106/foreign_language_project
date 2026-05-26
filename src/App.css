@@ -130,6 +130,8 @@ button {
   gap: 24px;
   font-weight: 700;
   color: #334155;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .navLinks a:hover {
@@ -628,8 +630,10 @@ button {
 }
 
 .userCard span {
+  display: block;
   color: #64748b;
   font-size: 14px;
+  margin-top: 4px;
 }
 
 .accountLink {
@@ -652,7 +656,6 @@ button {
   border-color: #cbd5e1;
 }
 
-/* Исправление цвета автозаполненных полей Chrome/Edge */
 .authForm input:-webkit-autofill,
 .authForm input:-webkit-autofill:hover,
 .authForm input:-webkit-autofill:focus,
@@ -798,6 +801,7 @@ button {
   box-shadow: 0 16px 45px rgba(15, 23, 42, 0.1);
 }
 
+.emptyLessons h1,
 .emptyLessons h2 {
   color: #0f172a;
   margin-top: 0;
@@ -836,4 +840,15 @@ button {
 
 .headerActions .secondaryButton {
   border: none;
+}
+
+.formError {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
 }
