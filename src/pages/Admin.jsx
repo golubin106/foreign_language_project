@@ -16,7 +16,9 @@ function Admin() {
   const [question, setQuestion] = useState("");
   const [optionsText, setOptionsText] = useState("");
   const [answer, setAnswer] = useState("");
+  const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
+  const [roleMessage, setRoleMessage] = useState("");
 
   useEffect(() => {
     async function loadLesson() {
@@ -52,6 +54,19 @@ function Admin() {
 
     loadLesson();
   }, [editId, isEditMode, navigate]);
+
+  useEffect(() => {
+    async function loadUsers() {
+      try {
+        const data = await apiRequest("/users");
+        setUsers(data.users || []);
+      } catch (error) {
+        setRoleMessage(error.message);
+      }
+    }
+
+    loadUsers();
+  }, []);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -131,6 +146,22 @@ function Admin() {
       navigate("/lessons");
     } catch (error) {
       setError(error.message);
+    }
+  }
+
+  async function updateUserRole(userId, role) {
+    setRoleMessage("");
+
+    try {
+      const data = await apiRequest(`/users/${userId}/role`, {
+        method: "PATCH",
+        body: JSON.stringify({ role }),
+      });
+
+      setUsers(data.users || []);
+      setRoleMessage("Роль пользователя обновлена.");
+    } catch (error) {
+      setRoleMessage(error.message);
     }
   }
 
@@ -238,6 +269,39 @@ function Admin() {
           </button>
         </form>
       </div>
+
+      <section className="adminBox usersAdminBox">
+        <div className="adminHeader">
+          <p className="badge">Пользователи</p>
+          <h1>Управление ролями</h1>
+          <p>
+            Первый зарегистрированный пользователь получает роль администратора.
+            Затем администратор может назначать роли остальным пользователям.
+          </p>
+        </div>
+
+        {roleMessage && <p className="formInfo">{roleMessage}</p>}
+
+        <div className="userRoleList">
+          {users.map((user) => (
+            <div className="userRoleItem" key={user.id}>
+              <div>
+                <h3>{user.name}</h3>
+                <p>{user.email}</p>
+                <span>{user.createdAt}</span>
+              </div>
+
+              <select
+                value={user.role}
+                onChange={(event) => updateUserRole(user.id, event.target.value)}
+              >
+                <option value="student">Ученик</option>
+                <option value="admin">Администратор</option>
+              </select>
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
