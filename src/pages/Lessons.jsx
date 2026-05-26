@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { getLessons } from "../data/getLessons";
+import { isAdmin } from "../utils/auth";
+import { readJson, writeJson } from "../utils/storage";
 
 function Lessons() {
   const lessons = getLessons();
+  const admin = isAdmin();
 
   const [searchText, setSearchText] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("all");
@@ -33,15 +36,17 @@ function Lessons() {
     });
 
   function deleteLesson(id) {
+    if (!admin) {
+      return;
+    }
+
     const confirmDelete = window.confirm("Удалить этот урок из каталога?");
 
     if (!confirmDelete) {
       return;
     }
 
-    const savedCustomLessons =
-      JSON.parse(localStorage.getItem("customLessons")) || [];
-
+    const savedCustomLessons = readJson("customLessons", []);
     const isCustomLesson = savedCustomLessons.some((lesson) => lesson.id === id);
 
     if (isCustomLesson) {
@@ -49,33 +54,27 @@ function Lessons() {
         (lesson) => lesson.id !== id
       );
 
-      localStorage.setItem(
-        "customLessons",
-        JSON.stringify(updatedCustomLessons)
-      );
+      writeJson("customLessons", updatedCustomLessons);
     } else {
-      const deletedLessons =
-        JSON.parse(localStorage.getItem("deletedLessons")) || [];
-
+      const deletedLessons = readJson("deletedLessons", []);
       const updatedDeletedLessons = [...new Set([...deletedLessons, id])];
 
-      localStorage.setItem(
-        "deletedLessons",
-        JSON.stringify(updatedDeletedLessons)
-      );
+      writeJson("deletedLessons", updatedDeletedLessons);
     }
 
-    const quizResults = JSON.parse(localStorage.getItem("quizResults")) || [];
-    const updatedQuizResults = quizResults.filter(
-      (item) => item.lessonId !== id
-    );
+    const quizResults = readJson("quizResults", []);
+    const updatedQuizResults = quizResults.filter((item) => item.lessonId !== id);
 
-    localStorage.setItem("quizResults", JSON.stringify(updatedQuizResults));
+    writeJson("quizResults", updatedQuizResults);
 
     window.location.reload();
   }
 
   function restoreDefaultLessons() {
+    if (!admin) {
+      return;
+    }
+
     localStorage.removeItem("deletedLessons");
     window.location.reload();
   }
@@ -92,15 +91,17 @@ function Lessons() {
           проверки знаний.
         </p>
 
-        <div className="headerActions">
-          <Link to="/admin" className="secondaryButton">
-            Добавить урок
-          </Link>
+        {admin && (
+          <div className="headerActions">
+            <Link to="/admin" className="secondaryButton">
+              Добавить урок
+            </Link>
 
-          <button className="secondaryButton" onClick={restoreDefaultLessons}>
-            Восстановить стандартные уроки
-          </button>
-        </div>
+            <button className="secondaryButton" onClick={restoreDefaultLessons}>
+              Восстановить стандартные уроки
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="filtersBox">
@@ -151,16 +152,20 @@ function Lessons() {
                   Открыть урок
                 </Link>
 
-                <Link to={`/admin/${lesson.id}`} className="editLessonButton">
-                  Редактировать
-                </Link>
+                {admin && (
+                  <>
+                    <Link to={`/admin/${lesson.id}`} className="editLessonButton">
+                      Редактировать
+                    </Link>
 
-                <button
-                  className="deleteLessonButton"
-                  onClick={() => deleteLesson(lesson.id)}
-                >
-                  Удалить
-                </button>
+                    <button
+                      className="deleteLessonButton"
+                      onClick={() => deleteLesson(lesson.id)}
+                    >
+                      Удалить
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ))}
