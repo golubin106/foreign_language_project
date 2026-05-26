@@ -56,7 +56,7 @@ export async function clearSession() {
   }
 
   try {
-    await apiRequest("/auth/logout", { method: "POST" });
+    await apiRequest("/auth/logout", { method: "POST" }, token);
   } catch {
     // Local logout should still succeed if the server is unavailable.
   }
