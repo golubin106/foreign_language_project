@@ -1,16 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getLessons } from "../data/getLessons";
 import { isAdmin } from "../utils/auth";
-import { readArray, writeJson } from "../utils/storage";
+import { apiRequest } from "../utils/api";
 
 function Lessons() {
-  const lessons = getLessons();
   const admin = isAdmin();
 
+  const [lessons, setLessons] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("all");
   const [sortType, setSortType] = useState("default");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadLessons() {
+      try {
+        const data = await apiRequest("/lessons");
+        setLessons(data.lessons || []);
+      } catch (error) {
+        setError(error.message);
+      }
+    }
+
+    loadLessons();
+  }, []);
 
   const filteredLessons = [...lessons]
     .filter((lesson) => {
@@ -35,7 +48,7 @@ function Lessons() {
       return 0;
     });
 
-  function deleteLesson(id) {
+  async function deleteLesson(id) {
     if (!admin) {
       return;
     }
@@ -46,37 +59,14 @@ function Lessons() {
       return;
     }
 
-    const savedCustomLessons = readArray("customLessons");
-    const isCustomLesson = savedCustomLessons.some((lesson) => lesson.id === id);
-
-    if (isCustomLesson) {
-      const updatedCustomLessons = savedCustomLessons.filter(
-        (lesson) => lesson.id !== id
+    try {
+      await apiRequest(`/lessons/${id}`, { method: "DELETE" });
+      setLessons((currentLessons) =>
+        currentLessons.filter((lesson) => lesson.id !== id)
       );
-
-      writeJson("customLessons", updatedCustomLessons);
-    } else {
-      const deletedLessons = readArray("deletedLessons");
-      const updatedDeletedLessons = [...new Set([...deletedLessons, id])];
-
-      writeJson("deletedLessons", updatedDeletedLessons);
+    } catch (error) {
+      setError(error.message);
     }
-
-    const quizResults = readArray("quizResults");
-    const updatedQuizResults = quizResults.filter((item) => item.lessonId !== id);
-
-    writeJson("quizResults", updatedQuizResults);
-
-    window.location.reload();
-  }
-
-  function restoreDefaultLessons() {
-    if (!admin) {
-      return;
-    }
-
-    localStorage.removeItem("deletedLessons");
-    window.location.reload();
   }
 
   return (
@@ -96,13 +86,11 @@ function Lessons() {
             <Link to="/admin" className="secondaryButton">
               Добавить урок
             </Link>
-
-            <button className="secondaryButton" onClick={restoreDefaultLessons}>
-              Восстановить стандартные уроки
-            </button>
           </div>
         )}
       </div>
+
+      {error && <p className="formError">{error}</p>}
 
       <div className="filtersBox">
         <input
