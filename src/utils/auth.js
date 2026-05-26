@@ -48,11 +48,16 @@ export async function loginUser({ email, password }) {
 }
 
 export async function clearSession() {
+  const token = getStoredToken();
+  clearStoredSession();
+
+  if (!token) {
+    return;
+  }
+
   try {
     await apiRequest("/auth/logout", { method: "POST" });
   } catch {
-    // The local session should still be cleared if the server is unavailable.
+    // Local logout should still succeed if the server is unavailable.
   }
-
-  clearStoredSession();
 }
