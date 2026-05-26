@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { getLessons } from "../data/getLessons";
 import { isAdmin } from "../utils/auth";
-import { readJson, writeJson } from "../utils/storage";
+import { readArray, writeJson } from "../utils/storage";
 
 function Lessons() {
   const lessons = getLessons();
@@ -46,7 +46,7 @@ function Lessons() {
       return;
     }
 
-    const savedCustomLessons = readJson("customLessons", []);
+    const savedCustomLessons = readArray("customLessons");
     const isCustomLesson = savedCustomLessons.some((lesson) => lesson.id === id);
 
     if (isCustomLesson) {
@@ -56,13 +56,13 @@ function Lessons() {
 
       writeJson("customLessons", updatedCustomLessons);
     } else {
-      const deletedLessons = readJson("deletedLessons", []);
+      const deletedLessons = readArray("deletedLessons");
       const updatedDeletedLessons = [...new Set([...deletedLessons, id])];
 
       writeJson("deletedLessons", updatedDeletedLessons);
     }
 
-    const quizResults = readJson("quizResults", []);
+    const quizResults = readArray("quizResults");
     const updatedQuizResults = quizResults.filter((item) => item.lessonId !== id);
 
     writeJson("quizResults", updatedQuizResults);
