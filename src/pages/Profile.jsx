@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getLessons } from "../data/getLessons";
 import { getCurrentUser } from "../utils/auth";
-import { readJson } from "../utils/storage";
+import { readArray } from "../utils/storage";
 
 function Profile() {
   const [results, setResults] = useState([]);
@@ -10,8 +10,7 @@ function Profile() {
   const user = getCurrentUser();
 
   useEffect(() => {
-    const savedResults = readJson("quizResults", []);
-    setResults(Array.isArray(savedResults) ? savedResults : []);
+    setResults(readArray("quizResults"));
   }, []);
 
   const completedLessons = results.length;
@@ -19,7 +18,8 @@ function Profile() {
   const averagePercent =
     results.length > 0
       ? Math.round(
-          results.reduce((sum, item) => sum + item.percent, 0) / results.length
+          results.reduce((sum, item) => sum + (item.percent || 0), 0) /
+            results.length
         )
       : 0;
 
