@@ -36,14 +36,20 @@ export function clearSession() {
 export async function hashPassword(password) {
   const passwordData = new TextEncoder().encode(password);
 
-  if (crypto?.subtle) {
-    const hashBuffer = await crypto.subtle.digest("SHA-256", passwordData);
+  if (globalThis.crypto?.subtle) {
+    const hashBuffer = await globalThis.crypto.subtle.digest(
+      "SHA-256",
+      passwordData
+    );
+
     return Array.from(new Uint8Array(hashBuffer))
       .map((byte) => byte.toString(16).padStart(2, "0"))
       .join("");
   }
 
-  return btoa(unescape(encodeURIComponent(password)));
+  return Array.from(passwordData)
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 export async function createUser({ name, email, password, adminCode }) {
@@ -72,12 +78,14 @@ export async function verifyPassword(user, password) {
   }
 
   if (user.password === password) {
-    writeJson(USER_KEY, {
+    const migratedUser = {
       ...user,
-      password: undefined,
       passwordHash,
       role: user.role === "admin" ? "admin" : "student",
-    });
+    };
+
+    delete migratedUser.password;
+    writeJson(USER_KEY, migratedUser);
 
     return true;
   }
