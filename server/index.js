@@ -265,6 +265,11 @@ async function handleRequest(request, response) {
         return;
       }
 
+      if (targetUser.id === currentUser.id && targetUser.role !== role) {
+        sendJson(response, 400, { message: "Администратор не может изменить собственную роль." });
+        return;
+      }
+
       const adminCount = database.users.filter((user) => user.role === "admin").length;
 
       if (targetUser.role === "admin" && role === "student" && adminCount <= 1) {
