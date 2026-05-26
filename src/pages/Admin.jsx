@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getLessons } from "../data/getLessons";
 import { defaultLessons } from "../data/lessons";
-import { readJson, writeJson } from "../utils/storage";
+import { readArray, writeJson } from "../utils/storage";
 
 function Admin() {
   const navigate = useNavigate();
@@ -123,7 +123,7 @@ function Admin() {
       );
 
       if (isDefaultLesson) {
-        const editedLessons = readJson("editedLessons", []);
+        const editedLessons = readArray("editedLessons");
         const updatedEditedLessons = [
           ...editedLessons.filter((lesson) => lesson.id !== editId),
           newLesson,
@@ -131,7 +131,7 @@ function Admin() {
 
         writeJson("editedLessons", updatedEditedLessons);
       } else {
-        const savedCustomLessons = readJson("customLessons", []);
+        const savedCustomLessons = readArray("customLessons");
         const updatedCustomLessons = savedCustomLessons.map((lesson) =>
           lesson.id === editId ? newLesson : lesson
         );
@@ -139,7 +139,7 @@ function Admin() {
         writeJson("customLessons", updatedCustomLessons);
       }
     } else {
-      const savedCustomLessons = readJson("customLessons", []);
+      const savedCustomLessons = readArray("customLessons");
       writeJson("customLessons", [...savedCustomLessons, newLesson]);
     }
 
