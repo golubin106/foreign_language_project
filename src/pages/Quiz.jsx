@@ -1,16 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getLessons } from "../data/getLessons";
-import { readArray, writeJson } from "../utils/storage";
+import { apiRequest } from "../utils/api";
 
 function Quiz() {
   const { id } = useParams();
-  const lessons = getLessons();
-  const lesson = lessons.find((item) => item.id === Number(id));
 
+  const [lesson, setLesson] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadLesson() {
+      try {
+        const data = await apiRequest("/lessons");
+        const foundLesson = data.lessons.find((item) => item.id === Number(id));
+        setLesson(foundLesson || null);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadLesson();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <main className="page">
+        <h1>Загрузка теста...</h1>
+      </main>
+    );
+  }
 
   if (!lesson) {
     return (
@@ -28,7 +51,7 @@ function Quiz() {
     });
   }
 
-  function checkResult() {
+  async function checkResult() {
     setError("");
 
     if (lesson.questions.length === 0) {
@@ -58,16 +81,16 @@ function Quiz() {
       score,
       total: lesson.questions.length,
       percent: Math.round((score / lesson.questions.length) * 100),
-      completedAt: new Date().toLocaleString(),
     };
 
-    const savedResults = readArray("quizResults");
-    const filteredResults = savedResults.filter(
-      (item) => item.lessonId !== lesson.id
-    );
-    const updatedResults = [...filteredResults, newResult];
-
-    writeJson("quizResults", updatedResults);
+    try {
+      await apiRequest("/results", {
+        method: "POST",
+        body: JSON.stringify(newResult),
+      });
+    } catch (error) {
+      setError(error.message);
+    }
   }
 
   return (
