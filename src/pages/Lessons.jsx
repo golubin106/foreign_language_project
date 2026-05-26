@@ -1,0 +1,173 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { getLessons } from "../data/getLessons";
+
+function Lessons() {
+  const lessons = getLessons();
+
+  const [searchText, setSearchText] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState("all");
+  const [sortType, setSortType] = useState("default");
+
+  const filteredLessons = [...lessons]
+    .filter((lesson) => {
+      const matchesSearch =
+        lesson.title.toLowerCase().includes(searchText.toLowerCase()) ||
+        lesson.description.toLowerCase().includes(searchText.toLowerCase());
+
+      const matchesLevel =
+        selectedLevel === "all" || lesson.level === selectedLevel;
+
+      return matchesSearch && matchesLevel;
+    })
+    .sort((a, b) => {
+      if (sortType === "title") {
+        return a.title.localeCompare(b.title);
+      }
+
+      if (sortType === "level") {
+        return a.level.localeCompare(b.level);
+      }
+
+      return 0;
+    });
+
+  function deleteLesson(id) {
+    const confirmDelete = window.confirm("Удалить этот урок из каталога?");
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    const savedCustomLessons =
+      JSON.parse(localStorage.getItem("customLessons")) || [];
+
+    const isCustomLesson = savedCustomLessons.some((lesson) => lesson.id === id);
+
+    if (isCustomLesson) {
+      const updatedCustomLessons = savedCustomLessons.filter(
+        (lesson) => lesson.id !== id
+      );
+
+      localStorage.setItem(
+        "customLessons",
+        JSON.stringify(updatedCustomLessons)
+      );
+    } else {
+      const deletedLessons =
+        JSON.parse(localStorage.getItem("deletedLessons")) || [];
+
+      const updatedDeletedLessons = [...new Set([...deletedLessons, id])];
+
+      localStorage.setItem(
+        "deletedLessons",
+        JSON.stringify(updatedDeletedLessons)
+      );
+    }
+
+    const quizResults = JSON.parse(localStorage.getItem("quizResults")) || [];
+    const updatedQuizResults = quizResults.filter(
+      (item) => item.lessonId !== id
+    );
+
+    localStorage.setItem("quizResults", JSON.stringify(updatedQuizResults));
+
+    window.location.reload();
+  }
+
+  function restoreDefaultLessons() {
+    localStorage.removeItem("deletedLessons");
+    window.location.reload();
+  }
+
+  return (
+    <main className="page">
+      <div className="pageHeader">
+        <p className="badge">Каталог уроков</p>
+
+        <h1>Уроки английского языка</h1>
+
+        <p>
+          Выберите урок, изучите новые слова и пройдите небольшой тест для
+          проверки знаний.
+        </p>
+
+        <div className="headerActions">
+          <Link to="/admin" className="secondaryButton">
+            Добавить урок
+          </Link>
+
+          <button className="secondaryButton" onClick={restoreDefaultLessons}>
+            Восстановить стандартные уроки
+          </button>
+        </div>
+      </div>
+
+      <div className="filtersBox">
+        <input
+          type="text"
+          placeholder="Поиск по названию или описанию..."
+          value={searchText}
+          onChange={(event) => setSearchText(event.target.value)}
+        />
+
+        <select
+          value={selectedLevel}
+          onChange={(event) => setSelectedLevel(event.target.value)}
+        >
+          <option value="all">Все уровни</option>
+          <option value="A1">A1</option>
+          <option value="A2">A2</option>
+          <option value="B1">B1</option>
+          <option value="B2">B2</option>
+        </select>
+
+        <select
+          value={sortType}
+          onChange={(event) => setSortType(event.target.value)}
+        >
+          <option value="default">Без сортировки</option>
+          <option value="title">По названию</option>
+          <option value="level">По уровню</option>
+        </select>
+      </div>
+
+      {filteredLessons.length === 0 ? (
+        <div className="emptyLessons">
+          <h2>Уроки не найдены</h2>
+          <p>Попробуйте изменить поисковый запрос или уровень.</p>
+        </div>
+      ) : (
+        <div className="lessonGrid">
+          {filteredLessons.map((lesson) => (
+            <div className="lessonCard" key={lesson.id}>
+              <span className="level">{lesson.level}</span>
+
+              <h2>{lesson.title}</h2>
+              <p>{lesson.description}</p>
+
+              <div className="lessonActions">
+                <Link to={`/lessons/${lesson.id}`} className="cardButton">
+                  Открыть урок
+                </Link>
+
+                <Link to={`/admin/${lesson.id}`} className="editLessonButton">
+                  Редактировать
+                </Link>
+
+                <button
+                  className="deleteLessonButton"
+                  onClick={() => deleteLesson(lesson.id)}
+                >
+                  Удалить
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
+  );
+}
+
+export default Lessons;

@@ -1,0 +1,839 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef4ff;
+  color: #0f172a;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.heroContent {
+  width: 100%;
+  max-width: 900px;
+  background: #ffffff;
+  padding: 50px;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 999px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  font-size: 48px;
+  line-height: 1.1;
+  margin: 0 0 20px;
+  color: #0f172a;
+}
+
+.subtitle {
+  font-size: 18px;
+  line-height: 1.7;
+  color: #334155;
+  max-width: 720px;
+  margin: 0 auto 30px;
+}
+
+.heroButtons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton {
+  border: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.primaryButton {
+  background: #2563eb;
+  color: white;
+}
+
+.secondaryButton {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.primaryButton:hover {
+  background: #1d4ed8;
+}
+
+.secondaryButton:hover {
+  background: #cbd5e1;
+}
+
+@media (max-width: 700px) {
+  .heroContent {
+    padding: 30px 20px;
+  }
+
+  .hero h1 {
+    font-size: 34px;
+  }
+}
+
+.navbar {
+  width: 100%;
+  padding: 18px 40px;
+  background: #ffffff;
+  border-bottom: 1px solid #dbe3f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-weight: 800;
+  font-size: 22px;
+  color: #2563eb;
+}
+
+.navLinks {
+  display: flex;
+  gap: 24px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.navLinks a:hover {
+  color: #2563eb;
+}
+
+.page {
+  padding: 50px 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.pageHeader h1 {
+  font-size: 40px;
+  margin: 15px 0;
+  color: #0f172a;
+}
+
+.pageHeader p {
+  color: #475569;
+  font-size: 18px;
+}
+
+.lessonGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.lessonCard,
+.profileBox {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 30px;
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.1);
+}
+
+.lessonCard h2 {
+  margin: 14px 0 10px;
+  color: #0f172a;
+}
+
+.lessonCard p {
+  color: #475569;
+  line-height: 1.6;
+}
+
+.level {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.cardButton {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+}
+
+.cardButton:hover {
+  background: #1d4ed8;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 25px;
+}
+
+.statCard {
+  background: #f8fafc;
+  padding: 24px;
+  border-radius: 18px;
+  text-align: center;
+}
+
+.statCard h2 {
+  font-size: 36px;
+  color: #2563eb;
+  margin: 0;
+}
+
+.statCard p {
+  color: #475569;
+  font-weight: 700;
+}
+
+.primaryButton,
+.secondaryButton,
+.cardButton {
+  display: inline-block;
+  text-decoration: none;
+}
+
+@media (max-width: 800px) {
+  .navbar {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .lessonGrid,
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pageHeader h1 {
+    font-size: 32px;
+  }
+}
+
+.lessonDetail {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 35px;
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.1);
+}
+
+.lessonDetail h1 {
+  font-size: 38px;
+  margin: 18px 0 10px;
+  color: #0f172a;
+}
+
+.lessonDetail h2 {
+  margin-top: 30px;
+  color: #0f172a;
+}
+
+.lessonDetail p {
+  color: #475569;
+  line-height: 1.7;
+  font-size: 18px;
+}
+
+.wordList {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 30px;
+}
+
+.wordItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #f1f5f9;
+  border-radius: 12px;
+  font-size: 17px;
+}
+
+.wordItem strong {
+  color: #0f172a;
+}
+
+.wordItem span {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.quizBox {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 35px;
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.1);
+}
+
+.quizBox h1 {
+  font-size: 36px;
+  margin: 18px 0 10px;
+  color: #0f172a;
+}
+
+.quizDescription {
+  color: #475569;
+  line-height: 1.7;
+  font-size: 18px;
+}
+
+.questionBox {
+  margin: 25px 0;
+  padding: 22px;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.questionBox h3 {
+  margin-top: 0;
+  color: #0f172a;
+}
+
+.option {
+  display: block;
+  margin: 12px 0;
+  color: #334155;
+  font-weight: 600;
+}
+
+.option input {
+  margin-right: 10px;
+}
+
+.resultBox {
+  margin-top: 25px;
+  padding: 24px;
+  background: #dcfce7;
+  color: #14532d;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.resultBox h2 {
+  margin-top: 0;
+  color: #14532d;
+}
+
+.resultBox p {
+  color: #166534;
+  font-weight: 600;
+}
+
+.resultBox .secondaryButton {
+  margin-top: 12px;
+}
+
+.sectionTitle {
+  margin-top: 35px;
+  color: #0f172a;
+  text-align: center;
+}
+
+.emptyText {
+  color: #475569;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.historyList {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.historyItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 18px;
+  border-radius: 16px;
+}
+
+.historyItem h3 {
+  margin: 0 0 6px;
+  color: #0f172a;
+}
+
+.historyItem p {
+  margin: 0;
+  color: #64748b;
+}
+
+.historyItem strong {
+  color: #2563eb;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.dangerButton {
+  margin-top: 24px;
+  border: none;
+  padding: 13px 18px;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 800;
+}
+
+.dangerButton:hover {
+  background: #fecaca;
+}
+
+@media (max-width: 700px) {
+  .historyItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.optionButton {
+  width: 100%;
+  display: block;
+  margin: 10px 0;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: left;
+  transition: 0.2s;
+}
+
+.optionButton:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+}
+
+.selectedOption {
+  background: #dbeafe;
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.profileBox h1 {
+  color: #0f172a;
+  font-size: 38px;
+  margin: 18px 0 20px;
+  text-align: center;
+}
+
+.profileBox h2,
+.profileBox h3 {
+  color: #0f172a;
+}
+
+.profileBox {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.profileBox h1 {
+  color: #0f172a;
+  font-size: 36px;
+  margin: 18px 0 24px;
+  text-align: center;
+}
+
+.profileBox .badge {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 18px;
+}
+
+.statCard {
+  background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+  border: 1px solid #e2e8f0;
+}
+
+.historyItem {
+  transition: 0.2s;
+}
+
+.historyItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.authBox {
+  max-width: 560px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 36px;
+  border-radius: 22px;
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.1);
+  text-align: center;
+}
+
+.authBox h1 {
+  color: #0f172a;
+  font-size: 40px;
+  line-height: 1.1;
+  margin: 18px 0 12px;
+}
+
+.authText {
+  color: #475569;
+  font-size: 17px;
+  line-height: 1.6;
+  margin: 0 auto 28px;
+  max-width: 420px;
+}
+
+.authForm {
+  display: grid;
+  gap: 16px;
+  text-align: left;
+}
+
+.authForm label {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.authForm input {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 16px;
+  outline: none;
+}
+
+.authForm input::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.authForm input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+.authForm .primaryButton {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.authFooter {
+  margin-top: 22px;
+  color: #475569;
+}
+
+.authFooter a {
+  color: #2563eb;
+  font-weight: 800;
+}
+
+.logoutButton {
+  border: none;
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.logoutButton:hover {
+  background: #fecaca;
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 22px;
+  border-radius: 18px;
+  margin-bottom: 28px;
+  text-align: left;
+}
+
+.avatarCircle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.userCard h2 {
+  margin: 0 0 6px;
+  color: #0f172a;
+}
+
+.userCard p {
+  margin: 0 0 6px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.userCard span {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.accountLink {
+  color: #2563eb;
+  font-weight: 900;
+}
+
+@media (max-width: 700px) {
+  .userCard {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.authForm input,
+.authForm input:focus,
+.authForm input:active {
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* Исправление цвета автозаполненных полей Chrome/Edge */
+.authForm input:-webkit-autofill,
+.authForm input:-webkit-autofill:hover,
+.authForm input:-webkit-autofill:focus,
+.authForm input:-webkit-autofill:active {
+  -webkit-text-fill-color: #0f172a;
+  box-shadow: 0 0 0 1000px #ffffff inset;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+  caret-color: #0f172a;
+  border: 1px solid #cbd5e1;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+.authForm input::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.adminBox {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 36px;
+  border-radius: 22px;
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.1);
+  text-align: center;
+}
+
+.adminBox h1 {
+  color: #0f172a;
+}
+
+.authForm textarea,
+.authForm select {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 16px;
+  outline: none;
+  font-family: Arial, sans-serif;
+}
+
+.authForm textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.authForm textarea:focus,
+.authForm select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+.adminHeader {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.adminHeader .badge {
+  margin-bottom: 16px;
+}
+
+.adminHeader h1 {
+  color: #0f172a;
+  font-size: 36px;
+  line-height: 1.2;
+  margin: 0 0 12px;
+}
+
+.adminHeader p {
+  max-width: 440px;
+  margin: 0 auto;
+  color: #475569;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.lessonActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.lessonActions .cardButton {
+  margin-top: 0;
+}
+
+.deleteLessonButton {
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 800;
+}
+
+.deleteLessonButton:hover {
+  background: #fecaca;
+}
+
+.filtersBox {
+  display: grid;
+  grid-template-columns: 1fr 180px 200px;
+  gap: 16px;
+  margin: 0 auto 30px;
+  max-width: 1000px;
+}
+
+.filtersBox input,
+.filtersBox select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 16px;
+  outline: none;
+}
+
+.filtersBox input::placeholder {
+  color: #94a3b8;
+}
+
+.filtersBox input:focus,
+.filtersBox select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+.emptyLessons {
+  max-width: 700px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 22px;
+  text-align: center;
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.1);
+}
+
+.emptyLessons h2 {
+  color: #0f172a;
+  margin-top: 0;
+}
+
+.emptyLessons p {
+  color: #475569;
+}
+
+@media (max-width: 700px) {
+  .filtersBox {
+    grid-template-columns: 1fr;
+  }
+}
+
+.editLessonButton {
+  display: inline-block;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: #e0ecff;
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.editLessonButton:hover {
+  background: #bfdbfe;
+}
+
+.headerActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.headerActions .secondaryButton {
+  border: none;
+}
