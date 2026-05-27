@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 import "./App.css";
+import "./styles/admin.css";
 
 function App() {
   return (
