@@ -61,6 +61,7 @@ function Admin() {
   const [wordsText, setWordsText] = useState("");
   const [questionsText, setQuestionsText] = useState("");
   const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState(null);
   const [error, setError] = useState("");
   const [roleMessage, setRoleMessage] = useState("");
 
@@ -98,16 +99,21 @@ function Admin() {
   }, [editId, isEditMode, navigate]);
 
   useEffect(() => {
-    async function loadUsers() {
+    async function loadAdminData() {
       try {
-        const data = await apiRequest("/users");
-        setUsers(data.users || []);
+        const [usersData, statsData] = await Promise.all([
+          apiRequest("/users"),
+          apiRequest("/admin/stats"),
+        ]);
+
+        setUsers(usersData.users || []);
+        setStats(statsData.stats || null);
       } catch (error) {
         setRoleMessage(error.message);
       }
     }
 
-    loadUsers();
+    loadAdminData();
   }, []);
 
   async function handleSubmit(event) {
@@ -183,8 +189,10 @@ function Admin() {
         method: "PATCH",
         body: JSON.stringify({ role }),
       });
+      const statsData = await apiRequest("/admin/stats");
 
       setUsers(data.users || []);
+      setStats(statsData.stats || null);
       setRoleMessage("Роль пользователя обновлена.");
     } catch (error) {
       setRoleMessage(error.message);
@@ -193,6 +201,89 @@ function Admin() {
 
   return (
     <main className="page">
+      <section className="adminBox adminStatsBox">
+        <div className="adminHeader">
+          <p className="badge">Статистика</p>
+          <h1>Обзор платформы</h1>
+          <p>
+            Сводка показывает активность пользователей, результаты тестов и
+            распределение прогресса по уровням.
+          </p>
+        </div>
+
+        <div className="adminStatsGrid">
+          <div className="adminStatCard">
+            <h2>{stats?.summary.users || 0}</h2>
+            <p>Пользователей</p>
+          </div>
+          <div className="adminStatCard">
+            <h2>{stats?.summary.lessons || 0}</h2>
+            <p>Уроков</p>
+          </div>
+          <div className="adminStatCard">
+            <h2>{stats?.summary.results || 0}</h2>
+            <p>Тестов пройдено</p>
+          </div>
+          <div className="adminStatCard">
+            <h2>{stats?.summary.averagePercent || 0}%</h2>
+            <p>Средний результат</p>
+          </div>
+        </div>
+
+        <div className="adminAnalyticsGrid">
+          <div className="analyticsPanel">
+            <h3>По уровням</h3>
+            {stats?.levelStats.length ? (
+              <div className="levelStatsList">
+                {stats.levelStats.map((item) => (
+                  <div className="levelStatsItem" key={item.level}>
+                    <span>{item.level}</span>
+                    <strong>{item.averagePercent}%</strong>
+                    <small>{item.attempts} попыток</small>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="emptyText">Пока нет результатов тестов.</p>
+            )}
+          </div>
+
+          <div className="analyticsPanel">
+            <h3>Популярные уроки</h3>
+            {stats?.lessonStats.length ? (
+              <div className="compactList">
+                {stats.lessonStats.map((item) => (
+                  <div className="compactListItem" key={item.lessonId}>
+                    <span>{item.title}</span>
+                    <strong>{item.attempts} попыток</strong>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="emptyText">Уроки еще не проходили.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="analyticsPanel recentPanel">
+          <h3>Последние прохождения</h3>
+          {stats?.recentResults.length ? (
+            <div className="compactList">
+              {stats.recentResults.map((item, index) => (
+                <div className="compactListItem" key={`${item.userEmail}-${index}`}>
+                  <span>
+                    {item.userName} - {item.lessonTitle}
+                  </span>
+                  <strong>{item.percent}%</strong>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="emptyText">Недавних прохождений пока нет.</p>
+          )}
+        </div>
+      </section>
+
       <div className="adminBox">
         <div className="adminHeader">
           <p className="badge">
