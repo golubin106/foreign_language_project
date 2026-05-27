@@ -52,13 +52,22 @@ async function readDatabase() {
   try {
     const content = await readFile(databasePath, "utf8");
     const database = JSON.parse(content);
-
-    return {
+    const normalizedDatabase = {
       users: Array.isArray(database.users) ? database.users : [],
       sessions: Array.isArray(database.sessions) ? database.sessions : [],
       lessons: Array.isArray(database.lessons) ? database.lessons : defaultLessons,
       results: Array.isArray(database.results) ? database.results : [],
     };
+
+    if (
+      normalizedDatabase.users.length > 0 &&
+      !normalizedDatabase.users.some((user) => user.role === "admin")
+    ) {
+      normalizedDatabase.users[0].role = "admin";
+      await writeDatabase(normalizedDatabase);
+    }
+
+    return normalizedDatabase;
   } catch {
     return createInitialDatabase();
   }
@@ -141,6 +150,86 @@ function normalizeLesson(lesson, fallbackId) {
     description: String(lesson.description || "").trim(),
     words: Array.isArray(lesson.words) ? lesson.words : [],
     questions: Array.isArray(lesson.questions) ? lesson.questions : [],
+  };
+}
+
+function getAveragePercent(results) {
+  if (results.length === 0) {
+    return 0;
+  }
+
+  return Math.round(
+    results.reduce((sum, result) => sum + Number(result.percent || 0), 0) /
+      results.length
+  );
+}
+
+function buildAdminStats(database) {
+  const levelMap = new Map();
+
+  database.results.forEach((result) => {
+    const level = result.level || "Без уровня";
+    const current = levelMap.get(level) || { level, attempts: 0, percentSum: 0 };
+
+    current.attempts += 1;
+    current.percentSum += Number(result.percent || 0);
+    levelMap.set(level, current);
+  });
+
+  const levelStats = Array.from(levelMap.values())
+    .map((item) => ({
+      level: item.level,
+      attempts: item.attempts,
+      averagePercent: Math.round(item.percentSum / item.attempts),
+    }))
+    .sort((a, b) => a.level.localeCompare(b.level));
+
+  const lessonStats = database.lessons
+    .map((lesson) => {
+      const lessonResults = database.results.filter(
+        (result) => result.lessonId === lesson.id
+      );
+
+      return {
+        lessonId: lesson.id,
+        title: lesson.title,
+        level: lesson.level,
+        attempts: lessonResults.length,
+        averagePercent: getAveragePercent(lessonResults),
+      };
+    })
+    .filter((lesson) => lesson.attempts > 0)
+    .sort((a, b) => b.attempts - a.attempts || b.averagePercent - a.averagePercent)
+    .slice(0, 5);
+
+  const recentResults = database.results
+    .slice(-6)
+    .reverse()
+    .map((result) => {
+      const user = database.users.find((item) => item.id === result.userId);
+
+      return {
+        userName: user?.name || "Пользователь удален",
+        userEmail: user?.email || "",
+        lessonTitle: result.lessonTitle,
+        level: result.level,
+        percent: Number(result.percent || 0),
+        completedAt: result.completedAt,
+      };
+    });
+
+  return {
+    summary: {
+      users: database.users.length,
+      admins: database.users.filter((user) => user.role === "admin").length,
+      students: database.users.filter((user) => user.role !== "admin").length,
+      lessons: database.lessons.length,
+      results: database.results.length,
+      averagePercent: getAveragePercent(database.results),
+    },
+    levelStats,
+    lessonStats,
+    recentResults,
   };
 }
 
@@ -228,6 +317,15 @@ async function handleRequest(request, response) {
       database.sessions = database.sessions.filter((session) => session.token !== token);
       await writeDatabase(database);
       sendJson(response, 200, { ok: true });
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/stats") {
+      if (!requireAdmin(database, request, response)) {
+        return;
+      }
+
+      sendJson(response, 200, { stats: buildAdminStats(database) });
       return;
     }
 
