@@ -2,6 +2,52 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiRequest } from "../utils/api";
 
+function formatQuestions(questions = []) {
+  return questions
+    .map((question) => {
+      const options = Array.isArray(question.options) ? question.options.join("\n") : "";
+      return [question.question, options, `Ответ: ${question.answer || ""}`]
+        .filter(Boolean)
+        .join("\n");
+    })
+    .join("\n\n");
+}
+
+function parseQuestions(text) {
+  return text
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => {
+      const lines = block
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+      const answerLineIndex = lines.findIndex((line) =>
+        line.toLowerCase().startsWith("ответ:")
+      );
+
+      if (lines.length < 4 || answerLineIndex === -1) {
+        return null;
+      }
+
+      const question = lines[0];
+      const answer = lines[answerLineIndex].replace(/^ответ:\s*/i, "").trim();
+      const options = lines.slice(1, answerLineIndex);
+      const uniqueOptions = [...new Set(options)];
+
+      if (!question || uniqueOptions.length < 2 || !uniqueOptions.includes(answer)) {
+        return null;
+      }
+
+      return {
+        question,
+        options: uniqueOptions,
+        answer,
+      };
+    });
+}
+
 function Admin() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -13,9 +59,7 @@ function Admin() {
   const [level, setLevel] = useState("A1");
   const [description, setDescription] = useState("");
   const [wordsText, setWordsText] = useState("");
-  const [question, setQuestion] = useState("");
-  const [optionsText, setOptionsText] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [questionsText, setQuestionsText] = useState("");
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const [roleMessage, setRoleMessage] = useState("");
@@ -44,9 +88,7 @@ function Admin() {
             .map((word) => `${word.english} - ${word.russian}`)
             .join("\n")
         );
-        setQuestion(lesson.questions[0]?.question || "");
-        setOptionsText(lesson.questions[0]?.options.join("\n") || "");
-        setAnswer(lesson.questions[0]?.answer || "");
+        setQuestionsText(formatQuestions(lesson.questions));
       } catch (error) {
         setError(error.message);
       }
@@ -74,11 +116,9 @@ function Admin() {
 
     const trimmedTitle = title.trim();
     const trimmedDescription = description.trim();
-    const trimmedQuestion = question.trim();
-    const trimmedAnswer = answer.trim();
 
-    if (!trimmedTitle || !trimmedDescription || !trimmedQuestion) {
-      setError("Заполните название, описание и вопрос теста.");
+    if (!trimmedTitle || !trimmedDescription) {
+      setError("Заполните название и описание урока.");
       return;
     }
 
@@ -105,20 +145,12 @@ function Admin() {
       return;
     }
 
-    const options = optionsText
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
+    const questions = parseQuestions(questionsText);
 
-    const uniqueOptions = [...new Set(options)];
-
-    if (uniqueOptions.length < 2) {
-      setError("Добавьте минимум два разных варианта ответа.");
-      return;
-    }
-
-    if (!uniqueOptions.includes(trimmedAnswer)) {
-      setError("Правильный ответ должен совпадать с одним из вариантов ответа.");
+    if (questions.length === 0 || questions.some((question) => question === null)) {
+      setError(
+        "Проверьте блоки теста. Формат: вопрос, варианты ответов каждый с новой строки, затем строка 'Ответ: правильный вариант'. Между вопросами оставляйте пустую строку."
+      );
       return;
     }
 
@@ -128,13 +160,7 @@ function Admin() {
       level,
       description: trimmedDescription,
       words,
-      questions: [
-        {
-          question: trimmedQuestion,
-          options: uniqueOptions,
-          answer: trimmedAnswer,
-        },
-      ],
+      questions,
     };
 
     try {
@@ -233,33 +259,14 @@ function Admin() {
           </label>
 
           <label>
-            Вопрос теста
-            <input
-              type="text"
-              placeholder="Как переводится Travel?"
-              value={question}
-              onChange={(event) => setQuestion(event.target.value)}
-              required
-            />
-          </label>
-
-          <label>
-            Варианты ответа
+            Вопросы теста
             <textarea
-              placeholder={"Путешествие\nБилет\nОтель\nАэропорт"}
-              value={optionsText}
-              onChange={(event) => setOptionsText(event.target.value)}
-              required
-            />
-          </label>
-
-          <label>
-            Правильный ответ
-            <input
-              type="text"
-              placeholder="Путешествие"
-              value={answer}
-              onChange={(event) => setAnswer(event.target.value)}
+              className="questionsTextarea"
+              placeholder={
+                "Как переводится Travel?\nПутешествие\nБилет\nОтель\nОтвет: Путешествие\n\nКак переводится Ticket?\nБилет\nОтель\nАэропорт\nОтвет: Билет"
+              }
+              value={questionsText}
+              onChange={(event) => setQuestionsText(event.target.value)}
               required
             />
           </label>
