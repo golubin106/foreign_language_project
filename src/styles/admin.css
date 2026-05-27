@@ -1,0 +1,76 @@
+.questionsTextarea {
+  min-height: 220px;
+}
+
+.usersAdminBox {
+  margin-top: 28px;
+  max-width: 900px;
+}
+
+.formInfo {
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.userRoleList {
+  display: grid;
+  gap: 14px;
+  text-align: left;
+}
+
+.userRoleItem {
+  display: grid;
+  grid-template-columns: 1fr 190px;
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+}
+
+.userRoleItem h3 {
+  margin: 0 0 6px;
+  color: #0f172a;
+}
+
+.userRoleItem p {
+  margin: 0 0 6px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.userRoleItem span {
+  display: block;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.userRoleItem select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 700;
+  outline: none;
+}
+
+.userRoleItem select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+@media (max-width: 700px) {
+  .userRoleItem {
+    grid-template-columns: 1fr;
+  }
+}
