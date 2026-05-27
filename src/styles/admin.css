@@ -2,9 +2,101 @@
   min-height: 220px;
 }
 
+.adminStatsBox,
 .usersAdminBox {
   margin-top: 28px;
   max-width: 900px;
+}
+
+.adminStatsBox {
+  margin-top: 0;
+  margin-bottom: 28px;
+}
+
+.adminStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.adminStatCard {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+}
+
+.adminStatCard h2 {
+  margin: 0;
+  color: #2563eb;
+  font-size: 32px;
+}
+
+.adminStatCard p {
+  margin: 8px 0 0;
+  color: #475569;
+  font-weight: 800;
+}
+
+.adminAnalyticsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.analyticsPanel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px;
+  text-align: left;
+}
+
+.analyticsPanel h3 {
+  margin: 0 0 14px;
+  color: #0f172a;
+}
+
+.recentPanel {
+  margin-top: 16px;
+}
+
+.levelStatsList,
+.compactList {
+  display: grid;
+  gap: 10px;
+}
+
+.levelStatsItem,
+.compactListItem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.levelStatsItem small {
+  grid-column: 1 / -1;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.levelStatsItem span,
+.compactListItem span {
+  color: #334155;
+  font-weight: 800;
+}
+
+.levelStatsItem strong,
+.compactListItem strong {
+  color: #2563eb;
+  white-space: nowrap;
 }
 
 .formInfo {
@@ -69,7 +161,18 @@
   box-shadow: 0 0 0 4px #dbeafe;
 }
 
+@media (max-width: 900px) {
+  .adminStatsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .adminAnalyticsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 700px) {
+  .adminStatsGrid,
   .userRoleItem {
     grid-template-columns: 1fr;
   }
